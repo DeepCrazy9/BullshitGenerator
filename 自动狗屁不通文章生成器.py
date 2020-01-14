@@ -1,54 +1,55 @@
-#!/usr/bin/python
-# -*- coding: UTF-8 -*-
+import random
+import json
 
-import os, re
-import random,readJSON
+data = json.load(open("data.json", encoding="utf-8"))
 
-data = readJSON.读JSON文件("data.json")
-名人名言 = data["famous"] # a 代表前面垫话，b代表后面垫话
-前面垫话 = data["before"] # 在名人名言前面弄点废话
-后面垫话 = data['after']  # 在名人名言后面弄点废话
-废话 = data['bosh'] # 代表文章主要废话来源
 
-xx = "学生会退会"
+def generator(title, length):
+    """
+    :param title: 文章标题
+    :param length: 生成正文的长度
+    :return: 返回正文内容
+    """
+    body = ""
+    temp = ""
+    textfilter = [""]  # 解决了重复问题
+    norepeat = 50  # 50句话里没有重复。
 
-重复度 = 2
+    while len(body) < length:
+        num = random.randint(0, 100)
+        if num < 10:
+            temp = random.choice(data["famous"]) \
+                .replace('a', random.choice(data["before"])) \
+                .replace('b', random.choice(data['after'])) + "\r\n"  # 解决了一句话没写完就换行的问题。比如bosh句子后有时候会直接连上一个换行。
+        elif num < 20:
+            temp = random.choice(data["famous"]) \
+                .replace('a', random.choice(data["before"])) \
+                .replace('b', random.choice(data['after']))
+        else:
+            temp = random.choice(data["bosh"])
 
-def 洗牌遍历(列表):
-    global 重复度
-    池 = list(列表) * 重复度
-    while True:
-        random.shuffle(池)
-        for 元素 in 池:
-            yield 元素
+        while len(textfilter) < norepeat:
+            for i in textfilter:
+                if i == "":
+                    i = temp
+                    body += temp
+                elif i != temp:
+                    textfilter.append(temp)
+                    body += temp
+                else:
+                    break
+            break
+        else:
+            textfilter.pop(0)
+            continue
 
-下一句废话 = 洗牌遍历(废话)
-下一句名人名言 = 洗牌遍历(名人名言)
+        body = body.replace("x", title)
 
-def 来点名人名言():
-    global 下一句名人名言
-    xx = next(下一句名人名言)
-    xx = xx.replace(  "a",random.choice(前面垫话) )
-    xx = xx.replace(  "b",random.choice(后面垫话) )
-    return xx
+    return body
 
-def 另起一段():
-    xx = ". "
-    xx += "\r\n"
-    xx += "    "
-    return xx
 
-if __name__ == "__main__":
-    xx = input("请输入文章主题:")
-    for x in xx:
-        tmp = str()
-        while ( len(tmp) < 6000 ) :
-            分支 = random.randint(0,100)
-            if 分支 < 5:
-                tmp += 另起一段()
-            elif 分支 < 20 :
-                tmp += 来点名人名言()
-            else:
-                tmp += next(下一句废话)
-        tmp = tmp.replace("x",xx)
-        print(tmp)
+if __name__ == '__main__':
+    title = input("请输入文章主题:")
+    length = int(input("请输入文章长度（正整数）:"))
+    text = generator(title, length)
+    print(text)
