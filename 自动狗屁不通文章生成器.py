@@ -13,18 +13,22 @@ def generator(title, length):
     body = ""
     temp = ""
     textfilter = [""]  # 解决了重复问题
-    norepeat = 30  # 30句话里没有重复。
+    norepeat = 30  # 50句话里没有重复。
+    enter = 0
 
     while len(body) < length:
         num = random.randint(0, 100)
         a = textfilter[-1]
-        if num < 10 and a not in data["bosh"]:
-            temp = "\r\n"  # 解决了一句话没写完就换行的问题。比如bosh句子后有时候会直接连上一个换行。
+        if num < 10 and a not in data["bosh"] and enter != 0:
+            enter = 0
+            body += "\r\n"  # 解决了一句话没写完就换行的问题。比如bosh句子后有时候会直接连上一个换行。
         elif num < 20:
+            enter += 1
             temp = random.choice(data["famous"]) \
                 .replace('a', random.choice(data["before"])) \
                 .replace('b', random.choice(data['after']))
         else:
+            enter += 1
             temp = random.choice(data["bosh"])
 
         while len(textfilter) < norepeat:
